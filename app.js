@@ -4,7 +4,7 @@ const ADMIN_GITHUB = {
   owner: "shimakaze41kt-create",
   repo: "readalpharestudy",
   branch: "main",
-  token: "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",
+  token: "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",
 };
 
 const toc = [
