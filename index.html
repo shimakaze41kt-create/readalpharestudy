@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>リードα 復習セレクター</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section id="authScreen" class="auth-screen">
+      <form id="authForm" class="auth-card">
+        <h1>リードα 復習セレクター</h1>
+        <p>4桁IDと誕生日で、端末内の学習データを暗号化して管理します。</p>
+        <label>
+          4桁ID
+          <input
+            id="loginIdInput"
+            autocomplete="username"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]{4}"
+            required
+            placeholder="例: 4821"
+          />
+        </label>
+        <label>
+          誕生日
+          <input
+            id="loginPasswordInput"
+            autocomplete="bday"
+            required
+            type="date"
+          />
+        </label>
+        <div class="auth-actions">
+          <button id="loginButton" type="submit">ログイン</button>
+          <button id="createUserButton" type="button" class="secondary-button">新規作成</button>
+        </div>
+        <p id="authMessage" class="auth-message"></p>
+      </form>
+    </section>
+
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <h1>リードα 復習セレクター</h1>
+          <p id="currentUserLabel">問題の種類・関係性・やった回数・正答率から、今日取り組む問題番号を優先順に出します。</p>
+        </div>
+        <div class="hero-actions">
+          <label class="file-button">
+            CSVを読み込む
+            <input id="csvInput" type="file" accept=".csv,text/csv" />
+          </label>
+          <button id="exportButton" type="button">CSVを書き出す</button>
+          <button id="logoutButton" type="button" class="secondary-button">ログアウト</button>
+        </div>
+      </section>
+
+      <section class="sync-panel">
+        <div class="section-title">
+          <div>
+            <h2>クラウド同期</h2>
+            <p id="syncStatus">自動同期</p>
+          </div>
+          <div class="sync-actions">
+            <button id="saveGitHubSettingsButton" type="button" class="secondary-button">設定を保存</button>
+            <button id="pullGitHubButton" type="button">クラウドから読み込む</button>
+            <button id="pushGitHubButton" type="button">クラウドへ保存</button>
+          </div>
+        </div>
+        <div class="sync-grid">
+          <label>
+            名前
+            <input id="displayNameInput" placeholder="例: 太郎" />
+          </label>
+        </div>
+      </section>
+
+      <section class="control-band" aria-label="今日の条件">
+        <label>
+          今日の日付
+          <input id="todayInput" type="date" />
+        </label>
+        <label>
+          出題数
+          <input id="countInput" type="number" min="1" max="50" value="10" />
+        </label>
+        <label>
+          分野で絞る
+          <select id="topicFilter">
+            <option value="">すべて</option>
+          </select>
+        </label>
+        <label>
+          種類で絞る
+          <select id="typeFilter">
+            <option value="">すべて</option>
+          </select>
+        </label>
+        <button id="pickButton" type="button">今日の問題を出す</button>
+      </section>
+
+      <section class="today-grid">
+        <div class="recommendation-panel">
+          <div class="section-title">
+            <h2>今日やる問題</h2>
+            <span id="recommendationMeta">未選択</span>
+          </div>
+          <ol id="recommendationList" class="problem-list"></ol>
+        </div>
+
+        <form id="resultForm" class="result-panel">
+          <h2>結果を記録</h2>
+          <label>
+            問題番号
+            <input id="problemIdInput" required placeholder="例: 例題12 / p42-3" />
+          </label>
+          <label>
+            分野
+            <input id="topicInput" placeholder="例: 力学" />
+          </label>
+          <label>
+            種類
+            <select id="typeInput">
+              <option value="基礎CHECK">基礎CHECK</option>
+              <option value="基本例題">基本例題</option>
+              <option value="基本問題">基本問題</option>
+              <option value="応用問題">応用問題</option>
+            </select>
+          </label>
+          <div class="split-fields">
+            <label>
+              正誤
+              <select id="correctInput">
+                <option value="true">正解</option>
+                <option value="false">不正解</option>
+              </select>
+            </label>
+            <label>
+              実施日
+              <input id="attemptDateInput" type="date" />
+            </label>
+          </div>
+          <label>
+            メモ
+            <input id="noteInput" placeholder="ミスの原因など" />
+          </label>
+          <button type="submit">この結果を反映</button>
+        </form>
+      </section>
+
+      <section class="data-panel">
+        <div class="section-title">
+          <h2>問題データ</h2>
+          <button id="resetButton" type="button">サンプルに戻す</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>問題番号</th>
+                <th>分野</th>
+                <th>種類</th>
+                <th>回数</th>
+                <th>正答率</th>
+                <th>最終実施日</th>
+                <th>次回目安</th>
+                <th>関係</th>
+                <th>メモ</th>
+              </tr>
+            </thead>
+            <tbody id="problemTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
