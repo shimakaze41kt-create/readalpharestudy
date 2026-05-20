@@ -1,10 +1,10 @@
 const USER_INDEX_KEY = "lead-alpha-user-index-v2:";
 const PBKDF2_ITERATIONS = 210000;
 const ADMIN_GITHUB = {
-  owner: "",
-  repo: "",
+  owner: "shimakaze41kt-create",
+  repo: "readalpharestudy",
   branch: "main",
-  token: "",
+  token: "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",
 };
 
 const toc = [
