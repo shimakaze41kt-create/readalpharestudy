@@ -10,27 +10,14 @@
     <section id="authScreen" class="auth-screen">
       <form id="authForm" class="auth-card">
         <h1>リードα 復習セレクター</h1>
-        <p>4桁IDと誕生日で、端末内の学習データを暗号化して管理します。</p>
+        <p>4桁IDと誕生日でクラウド上の暗号化データを開きます。</p>
         <label>
           4桁ID
-          <input
-            id="loginIdInput"
-            autocomplete="username"
-            inputmode="numeric"
-            maxlength="4"
-            pattern="[0-9]{4}"
-            required
-            placeholder="例: 4821"
-          />
+          <input id="loginIdInput" autocomplete="username" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="例: 4821" />
         </label>
         <label>
           誕生日
-          <input
-            id="loginPasswordInput"
-            autocomplete="bday"
-            required
-            type="date"
-          />
+          <input id="loginPasswordInput" autocomplete="bday" required type="date" />
         </label>
         <div class="auth-actions">
           <button id="loginButton" type="submit">ログイン</button>
@@ -40,18 +27,13 @@
       </form>
     </section>
 
-    <main class="app-shell">
+    <main class="app-shell is-hidden">
       <section class="hero">
         <div>
           <h1>リードα 復習セレクター</h1>
-          <p id="currentUserLabel">問題の種類・関係性・やった回数・正答率から、今日取り組む問題番号を優先順に出します。</p>
+          <p id="currentUserLabel">クラウド同期中</p>
         </div>
         <div class="hero-actions">
-          <label class="file-button">
-            CSVを読み込む
-            <input id="csvInput" type="file" accept=".csv,text/csv" />
-          </label>
-          <button id="exportButton" type="button">CSVを書き出す</button>
           <button id="logoutButton" type="button" class="secondary-button">ログアウト</button>
         </div>
       </section>
@@ -62,17 +44,6 @@
             <h2>クラウド同期</h2>
             <p id="syncStatus">自動同期</p>
           </div>
-          <div class="sync-actions">
-            <button id="saveGitHubSettingsButton" type="button" class="secondary-button">設定を保存</button>
-            <button id="pullGitHubButton" type="button">クラウドから読み込む</button>
-            <button id="pushGitHubButton" type="button">クラウドへ保存</button>
-          </div>
-        </div>
-        <div class="sync-grid">
-          <label>
-            名前
-            <input id="displayNameInput" placeholder="例: 太郎" />
-          </label>
         </div>
       </section>
 
@@ -86,15 +57,31 @@
           <input id="countInput" type="number" min="1" max="50" value="10" />
         </label>
         <label>
-          分野で絞る
-          <select id="topicFilter">
+          分野
+          <select id="fieldFilter">
             <option value="">すべて</option>
           </select>
         </label>
         <label>
-          種類で絞る
-          <select id="typeFilter">
+          章
+          <select id="chapterFilter">
             <option value="">すべて</option>
+          </select>
+        </label>
+        <label>
+          知
+          <select id="knowledgeFilter">
+            <option value="">すべて</option>
+            <option value="1">指定あり</option>
+            <option value="0">指定なし</option>
+          </select>
+        </label>
+        <label>
+          考
+          <select id="thinkingFilter">
+            <option value="">すべて</option>
+            <option value="1">指定あり</option>
+            <option value="0">指定なし</option>
           </select>
         </label>
         <button id="pickButton" type="button">今日の問題を出す</button>
@@ -111,14 +98,16 @@
 
         <form id="resultForm" class="result-panel">
           <h2>結果を記録</h2>
-          <label>
-            問題番号
-            <input id="problemIdInput" required placeholder="例: 例題12 / p42-3" />
-          </label>
-          <label>
-            分野
-            <input id="topicInput" placeholder="例: 力学" />
-          </label>
+          <div class="split-fields">
+            <label>
+              編
+              <input id="partInput" required placeholder="例: 1" />
+            </label>
+            <label>
+              章
+              <input id="chapterInput" required placeholder="例: 2" />
+            </label>
+          </div>
           <label>
             種類
             <select id="typeInput">
@@ -127,6 +116,30 @@
               <option value="基本問題">基本問題</option>
               <option value="応用問題">応用問題</option>
             </select>
+          </label>
+          <label>
+            名前
+            <input id="problemNameInput" required placeholder="例: 例題12 / p42-3" />
+          </label>
+          <div class="split-fields">
+            <label>
+              知
+              <select id="knowledgeInput">
+                <option value="0">0</option>
+                <option value="1">1</option>
+              </select>
+            </label>
+            <label>
+              考
+              <select id="thinkingInput">
+                <option value="0">0</option>
+                <option value="1">1</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            関連問題
+            <input id="relatedInput" placeholder="例: 例題12,p42-3" />
           </label>
           <div class="split-fields">
             <label>
@@ -142,8 +155,8 @@
             </label>
           </div>
           <label>
-            メモ
-            <input id="noteInput" placeholder="ミスの原因など" />
+            コメント
+            <input id="commentInput" placeholder="直近コメントとして上書き" />
           </label>
           <button type="submit">この結果を反映</button>
         </form>
@@ -152,21 +165,22 @@
       <section class="data-panel">
         <div class="section-title">
           <h2>問題データ</h2>
-          <button id="resetButton" type="button">サンプルに戻す</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>問題番号</th>
+                <th>編</th>
+                <th>章</th>
                 <th>分野</th>
                 <th>種類</th>
+                <th>名前</th>
+                <th>知</th>
+                <th>考</th>
                 <th>回数</th>
                 <th>正答率</th>
                 <th>最終実施日</th>
-                <th>次回目安</th>
-                <th>関係</th>
-                <th>メモ</th>
+                <th>コメント</th>
               </tr>
             </thead>
             <tbody id="problemTableBody"></tbody>
