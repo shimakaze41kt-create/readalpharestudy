@@ -1,28 +1,14 @@
 const USER_INDEX_KEY = "lead-alpha-user-index-v2:";
 const PBKDF2_ITERATIONS = 210000;
-const ADMIN_GITHUB = {
-  owner: "shimakaze41kt-create",
-  repo: "readalpharestudy",
+const ADMIN_GITHUB = window.LEAD_ALPHA_CONFIG?.github || {
+  owner: "",
+  repo: "",
   branch: "main",
-  token: "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",
+  token: "",
 };
 
-const toc = [
-  { part: "1", field: "力学", chapter: "1", chapterName: "運動の表し方", page: "22-35" },
-  { part: "1", field: "力学", chapter: "2", chapterName: "力と運動", page: "36-55" },
-  { part: "1", field: "力学", chapter: "3", chapterName: "仕事とエネルギー", page: "56-73" },
-  { part: "2", field: "熱", chapter: "5", chapterName: "熱とエネルギー", page: "90-105" },
-  { part: "3", field: "波動", chapter: "6", chapterName: "波の性質", page: "106-125" },
-  { part: "4", field: "電磁気", chapter: "8", chapterName: "電場と電位", page: "150-173" },
-];
-
-const seedProblems = [
-  makeProblem({ part: "1", chapter: "2", type: "基礎CHECK", name: "基礎C-05", knowledge: 1, thinking: 0, related: "例題12", comment: "力のつり合い" }),
-  makeProblem({ part: "1", chapter: "2", type: "基本例題", name: "例題12", knowledge: 1, thinking: 1, related: "基礎C-05,p42-3", comment: "力の分解で符号ミス" }),
-  makeProblem({ part: "1", chapter: "2", type: "基本問題", name: "p42-3", knowledge: 0, thinking: 1, related: "例題12", comment: "次は時間を測る" }),
-  makeProblem({ part: "3", chapter: "6", type: "基本問題", name: "p58-7", knowledge: 1, thinking: 1, related: "例題21", comment: "位相差の式を確認" }),
-  makeProblem({ part: "2", chapter: "5", type: "基礎CHECK", name: "p91-4", knowledge: 1, thinking: 0, related: "", comment: "未着手" }),
-];
+const toc = window.LEAD_ALPHA_TOC || [];
+const seedProblems = window.LEAD_ALPHA_PROBLEMS || [];
 
 let state = { problems: [], records: [] };
 let activeUser = null;
@@ -135,8 +121,8 @@ async function loginUser() {
       await loadFromCloud();
       showApp();
       return;
-    } catch {
-      setAuthMessage("IDまたは誕生日が違うか、クラウドから読み込めません。");
+    } catch (error) {
+      setAuthMessage(readableCloudError(error));
       return;
     }
   }
@@ -146,9 +132,9 @@ async function loginUser() {
     await loadFromCloud(password);
     await saveLocalIndex();
     showApp();
-  } catch {
+  } catch (error) {
     activeUser = null;
-    setAuthMessage("クラウドにデータが見つかりません。初回は新規作成してください。");
+    setAuthMessage(readableCloudError(error));
   }
 }
 
@@ -186,7 +172,7 @@ async function saveCloud(message) {
 }
 
 async function loadFromCloud(passwordForFirstDevice = null) {
-  if (!hasCloudConfig()) throw new Error("cloud config missing");
+  if (!hasCloudConfig()) throw new Error("cloud-config-missing");
   setSyncStatus("クラウドから読み込み中...");
   const remote = await getGitHubJson(cloudPath(activeUser));
   const payload = JSON.parse(base64ToUtf8(remote.content.replace(/\n/g, "")));
@@ -381,7 +367,7 @@ function cloudPath(userId) {
 
 async function getGitHubJson(path) {
   const response = await fetch(githubContentUrl(path), { headers: githubHeaders() });
-  if (!response.ok) throw new Error(`GitHub取得失敗: ${response.status}`);
+  if (!response.ok) throw new Error(`github-get-${response.status}`);
   return response.json();
 }
 
@@ -398,7 +384,27 @@ async function putGitHubJson(path, data, message) {
     headers: { ...githubHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new Error(`GitHub保存失敗: ${response.status}`);
+  if (!response.ok) throw new Error(`github-put-${response.status}`);
+}
+
+function readableCloudError(error) {
+  const message = String(error?.message || error);
+  if (message.includes("cloud-config-missing")) {
+    return "管理者側のクラウド設定が未設定です。config.js の token を設定してください。";
+  }
+  if (message.includes("github-get-401") || message.includes("github-put-401")) {
+    return "GitHubトークンが無効です。新しいトークンを作って config.js の token に設定してください。";
+  }
+  if (message.includes("github-get-403") || message.includes("github-put-403")) {
+    return "GitHubトークンの権限が足りません。Contents の Read and write 権限を付けてください。";
+  }
+  if (message.includes("github-get-404")) {
+    return "クラウド上にこのIDのデータがありません。初回は新規作成してください。";
+  }
+  if (message.includes("OperationError")) {
+    return "誕生日が違うため、クラウドデータを復号できません。";
+  }
+  return "クラウドから読み込めません。リポジトリ名、ブランチ、トークン、通信状態を確認してください。";
 }
 
 function githubHeaders() {
